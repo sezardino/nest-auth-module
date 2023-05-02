@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CookieService } from '../shared/cookie.service';
 import { HashService } from '../shared/hash.service';
 import { TokenService } from '../shared/token.service';
@@ -14,7 +9,6 @@ import { AuthDto } from './dto/auth.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly hashService: HashService,
     private readonly tokenService: TokenService,
@@ -51,22 +45,7 @@ export class AuthService {
   }
 
   async signUp(dto: AuthDto) {
-    try {
-      const isUserExist = await this.userService.findOneByEmail(dto.email);
-
-      if (isUserExist) throw new UnauthorizedException('User already exist');
-    } catch (error) {
-      if (error?.status === 404) {
-        const hashedPassword = await this.hashService.hash(
-          dto.password,
-          'password',
-        );
-
-        return this.userService.create(dto.email, hashedPassword);
-      } else {
-        throw new ForbiddenException('Something went wrong');
-      }
-    }
+    return this.userService.create(dto.email, dto.password);
   }
 
   async signOut(userEmail: string) {
@@ -78,10 +57,7 @@ export class AuthService {
       this.tokenService.generateTokens(user);
     const refreshCookieString = this.getRefreshCookie(refresh_token);
 
-    await this.userService.updateUserToken(
-      user.email,
-      await this.hashService.hash(refresh_token, 'token'),
-    );
+    await this.userService.updateUserToken(user.email, refresh_token);
 
     return { access_token, refreshCookieString };
   }
