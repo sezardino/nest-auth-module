@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { getMongoConfig } from '../config/mongo';
 import { AuthModule } from './auth/auth.module';
 import { JwtAccessGuard } from './auth/guards/jwt-access.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
 import { HashService } from './shared/hash.service';
 import { UserModule } from './user/user.module';
 
@@ -24,6 +25,10 @@ import { UserModule } from './user/user.module';
     {
       provide: 'APP_GUARD',
       useClass: JwtAccessGuard,
+    },
+    {
+      provide: 'APP_GUARD',
+      useClass: RolesGuard,
     },
   ],
 })

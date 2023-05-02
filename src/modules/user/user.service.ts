@@ -4,15 +4,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { HashService } from '../shared/hash.service';
-import { User } from './user.schema';
+import { PaginationService } from '../shared/pagination.service';
+import { FindUsersDto } from './dto/find-users.dto';
+import { User, UserRole } from './user.schema';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly hashService: HashService,
+    private readonly paginationService: PaginationService,
   ) {}
 
   async findOneByEmail(email: string) {
@@ -23,16 +26,70 @@ export class UserService {
     return user;
   }
 
-  async create(email: string, password: string) {
-    const isUserExist = this.userModel.findOne({ email }).exec();
+  async findOneById(id: string) {
+    const user = await this.userModel.findById(id).exec();
+
+    if (!user) throw new NotFoundException('User not found');
+
+    return user;
+  }
+
+  async findMany(
+    { role = UserRole.USER, ...dto }: FindUsersDto,
+    userRole: UserRole,
+  ) {
+    if (userRole === UserRole.SUB_ADMIN && role !== UserRole.USER)
+      throw new ForbiddenException('You can not get all admins');
+
+    const query: FilterQuery<User> = { role };
+
+    const totalCount = await this.userModel.find(query).countDocuments().exec();
+    const { limit, meta, skip } = this.paginationService.getPagination(
+      dto.page,
+      dto.limit,
+      totalCount,
+    );
+
+    const data = await this.userModel
+      .find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip(skip)
+      .exec();
+
+    return { data, meta };
+  }
+
+  async create(
+    email: string,
+    password: string,
+    role: UserRole = UserRole.USER,
+  ) {
+    const isUserExist = await this.userModel.findOne({ email }).exec();
 
     if (isUserExist) throw new ForbiddenException('User already exist');
 
     const hashedPassword = await this.hashService.hash(password, 'password');
 
-    const newUser = new this.userModel({ email, password: hashedPassword });
+    const newUser = new this.userModel({
+      email,
+      password: hashedPassword,
+      role,
+    });
 
     return (await newUser.save()).toJSON();
+  }
+
+  async deleteById(userId: string, role: UserRole) {
+    const user = await this.findOneById(userId);
+
+    if (
+      (user.role === UserRole.ADMIN || user.role === UserRole.SUB_ADMIN) &&
+      role !== UserRole.ADMIN
+    )
+      throw new ForbiddenException('You can not delete this user');
+
+    return this.userModel.findByIdAndDelete(userId).exec();
   }
 
   async updateUserToken(email: string, token: string) {
