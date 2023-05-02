@@ -3,11 +3,12 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
@@ -18,10 +19,12 @@ import RequestWithUser from './interfaces/request-with-user';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @ApiBody({ type: AuthDto })
-  @UseGuards(LocalAuthGuard)
   @Public()
   @Post('sign-in')
+  @HttpCode(200)
+  @ApiBody({ type: AuthDto })
+  @ApiOperation({ summary: 'Sign in to system with email and password' })
+  @UseGuards(LocalAuthGuard)
   async signIn(@Request() request: RequestWithUser) {
     const user = request.user;
     const { access_token, refreshCookieString } =
@@ -32,9 +35,10 @@ export class AuthController {
     return { ...user, access_token };
   }
 
-  @ApiBody({ type: AuthDto })
   @Public()
   @Post('sign-up')
+  @ApiOperation({ summary: 'Sign up with email and password' })
+  @ApiBody({ type: AuthDto })
   async signUp(@Request() request: RequestWithUser, @Body() dto: AuthDto) {
     const user = await this.authService.signUp(dto);
     const { access_token, refreshCookieString } =
@@ -46,7 +50,10 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @HttpCode(200)
   @UseGuards(JwtRefreshGuard)
+  @ApiOperation({ summary: 'Refresh access_token' })
+  @ApiBearerAuth()
   async refresh(@Request() request: RequestWithUser) {
     const user = request.user;
     const { access_token, refreshCookieString } =
@@ -57,12 +64,18 @@ export class AuthController {
     return { access_token };
   }
 
-  @Get('me')
+  @Get()
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user data' })
   async me(@Request() request: RequestWithUser) {
     return request.user;
   }
 
   @Post('sign-out')
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Logout from system' })
   async signOut(@Request() request: RequestWithUser) {
     await this.authService.signOut(request.user.email);
     const refreshCookieString = this.authService.getCookiesForLogOut();
