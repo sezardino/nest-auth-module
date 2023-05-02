@@ -13,7 +13,7 @@ export class HashService {
       case 'password':
         return this.config.get<string>('PASSWORD_HASH_SECRET');
       case 'token':
-        return this.config.get<string>('ACCESS_HASH_SECRET');
+        return this.config.get<string>('REFRESH_HASH_SECRET');
       default:
         throw new Error('Invalid secret type');
     }

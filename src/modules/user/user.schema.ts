@@ -21,6 +21,14 @@ export class User {
   @Prop({ required: true, enum: UserRole, default: UserRole.USER })
   @ApiProperty({ example: UserRole.ADMIN, description: 'role of the user' })
   role: UserRole;
+
+  @Prop({ required: false, default: '' })
+  @ApiProperty({
+    example: 'hashed token',
+    description: 'refresh token of the user',
+    default: '',
+  })
+  token: string;
 }
 
 export type CatDocument = HydratedDocument<User>;
@@ -29,6 +37,7 @@ export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.set('toJSON', {
   transform: (doc, ret) => {
     delete ret['password'];
+    delete ret['token'];
     return ret;
   },
 });

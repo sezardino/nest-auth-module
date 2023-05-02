@@ -3,8 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { getMongoConfig } from '../config/mongo';
 import { AuthModule } from './auth/auth.module';
+import { JwtAccessGuard } from './auth/guards/jwt-access.guard';
+import { HashService } from './shared/hash.service';
 import { UserModule } from './user/user.module';
-import { HashService } from './shared/hash/hash.service';
 
 @Module({
   imports: [
@@ -18,6 +19,12 @@ import { HashService } from './shared/hash/hash.service';
     UserModule,
   ],
   controllers: [],
-  providers: [HashService],
+  providers: [
+    HashService,
+    {
+      provide: 'APP_GUARD',
+      useClass: JwtAccessGuard,
+    },
+  ],
 })
 export class AppModule {}
