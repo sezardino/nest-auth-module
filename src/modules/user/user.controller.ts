@@ -10,12 +10,13 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateSubAdminDto } from './dto/crete-sub-admin.dto';
 import { FindUsersDto } from './dto/find-users.dto';
 import { UserRole } from './user.schema';
 import { UserService } from './user.service';
 
+@ApiTags('Users')
 @Controller('users')
 @Roles(UserRole.ADMIN, UserRole.SUB_ADMIN)
 export class UserController {

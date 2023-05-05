@@ -41,7 +41,7 @@ export class TokenService {
     switch (type) {
       case 'access':
         return {
-          expiresIn: this.config.get<string>('REFRESH_TOKEN_EXPIRATION_TIME'),
+          expiresIn: this.config.get<string>('ACCESS_TOKEN_EXPIRATION_TIME'),
           secret: this.config.get<string>('ACCESS_TOKEN_SECRET'),
         };
       case 'refresh':
