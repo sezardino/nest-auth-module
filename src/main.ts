@@ -10,7 +10,10 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api');
   app.use(cookieParser());
-  app.enableCors();
+  app.enableCors({
+    allowedHeaders: ['content-type', 'authorization'],
+    credentials: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Auth module for nestjs')
