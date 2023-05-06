@@ -8,7 +8,7 @@ export class CookieService {
   constructor(private readonly config: ConfigService) {}
 
   private getCookieString(name: string, value: string, expirationTime: string) {
-    return `${name}=${value}; HttpOnly; Path=/; SameSite=None; Max-Age=${expirationTime}`;
+    return `${name}=${value}; HttpOnly; Path=/; SameSite=None; Secure; Max-Age=${expirationTime}`;
   }
 
   getRefreshCookieString(token: string, expirationTime?: string) {
