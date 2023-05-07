@@ -9,6 +9,7 @@ import { HashService } from '../shared/hash.service';
 import { PaginationService } from '../shared/pagination.service';
 import { CreateUserDto } from './dto/crete-user.dto';
 import { FindUsersDto } from './dto/find-users.dto';
+import { UpdatePasswordDto } from './dto/update-password';
 import { UpdateUserProfileDto } from './dto/update-profile';
 import { User, UserRole } from './user.schema';
 
@@ -107,7 +108,7 @@ export class UserService {
   }
 
   async updateProfile(email: string, dto: UpdateUserProfileDto) {
-    const user = await this.findOneById(email);
+    const user = await this.findOneByEmail(email);
 
     const dataToUpdate = {};
 
@@ -116,6 +117,26 @@ export class UserService {
     if (dto.surname) dataToUpdate['surname'] = dto.surname;
 
     await user.updateOne({ $set: dataToUpdate });
+
+    return await user.save();
+  }
+
+  async updatePassword(email: string, dto: UpdatePasswordDto) {
+    const user = await this.findOneByEmail(email);
+
+    const { oldPassword, newPassword } = dto;
+
+    const isPasswordValid = await this.hashService.verify(
+      user.password,
+      oldPassword,
+      'password',
+    );
+
+    if (!isPasswordValid) throw new ForbiddenException('Wrong password');
+
+    const hashedPassword = await this.hashService.hash(newPassword, 'password');
+
+    await user.updateOne({ $set: { password: hashedPassword } });
 
     return await user.save();
   }

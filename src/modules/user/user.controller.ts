@@ -5,6 +5,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   Param,
@@ -15,6 +16,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/crete-user.dto';
 import { FindUsersDto } from './dto/find-users.dto';
+import { UpdatePasswordDto } from './dto/update-password';
 import { UpdateUserProfileDto } from './dto/update-profile';
 import { UserRole } from './user.schema';
 import { UserService } from './user.service';
@@ -29,7 +31,13 @@ export class UserController {
   @ApiOperation({ summary: 'Get all users' })
   @Roles(UserRole.ADMIN, UserRole.SUB_ADMIN)
   getUsers(@Query() query: FindUsersDto, @CurrentUserRole() role: UserRole) {
+    console.log(1);
     return this.userService.findMany(query, role);
+  }
+
+  @Get('profile')
+  userProfile(@CurrentUserEmail() userEmail: string) {
+    return this.userService.findOneByEmail(userEmail);
   }
 
   @Get(':id')
@@ -59,5 +67,17 @@ export class UserController {
     @CurrentUserEmail() userEmail: string,
   ) {
     return this.userService.updateProfile(userEmail, dto);
+  }
+
+  @Put('password')
+  updatePassword(
+    @Body() dto: UpdatePasswordDto,
+    @CurrentUserEmail() userEmail: string,
+    @CurrentUserRole() role: UserRole,
+  ) {
+    if (role === UserRole.ADMIN)
+      throw new ForbiddenException('Admin cannot change password');
+
+    return this.userService.updatePassword(userEmail, dto);
   }
 }
