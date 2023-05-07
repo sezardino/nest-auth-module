@@ -9,6 +9,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateSubAdminDto } from './dto/crete-sub-admin.dto';
@@ -25,8 +26,8 @@ export class UserController {
   @Get()
   @HttpCode(200)
   @ApiOperation({ summary: 'Get all users' })
-  getUsers(@Body() dto: FindUsersDto, @CurrentUserRole() role: UserRole) {
-    return this.userService.findMany(dto, role);
+  getUsers(@Query() query: FindUsersDto, @CurrentUserRole() role: UserRole) {
+    return this.userService.findMany(query, role);
   }
 
   @Get(':id')
