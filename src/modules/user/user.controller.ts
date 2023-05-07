@@ -31,7 +31,6 @@ export class UserController {
   @ApiOperation({ summary: 'Get all users' })
   @Roles(UserRole.ADMIN, UserRole.SUB_ADMIN)
   getUsers(@Query() query: FindUsersDto, @CurrentUserRole() role: UserRole) {
-    console.log(1);
     return this.userService.findMany(query, role);
   }
 
