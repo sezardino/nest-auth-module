@@ -1,9 +1,9 @@
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { IsEnum, IsNumber, IsNumberString, IsOptional } from 'class-validator';
 import { UserRole } from '../user.schema';
 
 export class FindUsersDto {
   @IsOptional()
-  @IsNumber()
+  @IsNumberString()
   page?: number;
 
   @IsOptional()

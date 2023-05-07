@@ -45,7 +45,7 @@ export class AuthService {
   }
 
   async signUp(dto: AuthDto) {
-    return this.userService.create(dto.email, dto.password);
+    return this.userService.create(dto);
   }
 
   async signOut(userEmail: string) {

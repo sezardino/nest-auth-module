@@ -29,10 +29,25 @@ export class User {
     default: '',
   })
   token: string;
+
+  // Profile
+  @Prop({ required: true, type: String, default: '' })
+  @ApiProperty({ example: 'Vlad', description: 'user name' })
+  name: string;
+
+  @Prop({ required: true, type: String, default: '' })
+  @ApiProperty({ example: 'Drakula', description: 'user surname' })
+  surname: string;
+
+  @Prop({ required: true, type: String, default: '' })
+  @ApiProperty({ example: 'Transilvania', description: 'user address' })
+  address: string;
 }
 
 export type UserDocument = HydratedDocument<User>;
 export const UserSchema = SchemaFactory.createForClass(User);
+
+export type CurrentUserData = Pick<User, 'email' | 'role'>;
 
 UserSchema.set('toJSON', {
   transform: (doc, ret) => {

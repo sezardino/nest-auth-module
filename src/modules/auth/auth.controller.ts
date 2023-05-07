@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUserData } from '../user/user.schema';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
@@ -69,8 +70,13 @@ export class AuthController {
   @HttpCode(200)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user data' })
-  async me(@Request() request: RequestWithUser) {
-    return request.user;
+  async me(@Request() request: RequestWithUser): Promise<CurrentUserData> {
+    const userData: CurrentUserData = {
+      email: request.user.email,
+      role: request.user.role,
+    };
+
+    return userData;
   }
 
   @Post('sign-out')

@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
+import { UserRole } from '../user.schema';
 
-export class CreateSubAdminDto {
+export class CreateUserDto {
   @ApiProperty({
     example: 'test@mail.com',
     description: 'email of the sub admin',
@@ -16,4 +17,8 @@ export class CreateSubAdminDto {
   @IsString()
   @MinLength(6)
   password: string;
+
+  @ApiProperty()
+  @IsEnum(UserRole)
+  role?: UserRole;
 }
